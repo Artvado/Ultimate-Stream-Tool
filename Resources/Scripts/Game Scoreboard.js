@@ -15,6 +15,7 @@ let bestOfPrev;
 const roundSize = '32px';
 const casterSize = '24px';
 const twitterSize = '20px';
+const tournamentSize = '32px';
 
 //variables for the twitter/twitch constant change
 let socialInt1;
@@ -47,7 +48,7 @@ async function getData(scInfo) {
 	let p1Character = scInfo['p1Character'];
 	let p1Skin = scInfo['p1Skin'];
 	let p1WL = scInfo['p1WL'];
-	
+
 	let p2Name = scInfo['p2Name'];
 	let p2Team = scInfo['p2Team'];
 	let p2Score = scInfo['p2Score'];
@@ -58,6 +59,7 @@ async function getData(scInfo) {
 
 	let round = scInfo['round'];
 	let bestOf = scInfo['bestOf'];
+	let tournamentName = scInfo['tournamentName'];
 
 	let caster1 = scInfo['caster1Name'];
 	twitter1 = scInfo['caster1Twitter'];
@@ -69,6 +71,7 @@ async function getData(scInfo) {
 
 	//first, things that will happen only the first time the html loads
 	if (startup) {
+
 		//of course, we have to start with the cool intro stuff
 		const allowIntro = scInfo['allowIntro']; //to know if the intro is allowed
 		if (allowIntro) {
@@ -80,7 +83,7 @@ async function getData(scInfo) {
 			document.getElementById('overlayIntro').style.opacity = 1;
 
 			//this vid is just the bars moving (todo: maybe do it through javascript?)
-			setTimeout(() => { 
+			setTimeout(() => {
 				document.getElementById('introVid').setAttribute('src', 'Resources/Webms/Intro.webm');
 				document.getElementById('introVid').play();
 			}, 0); //if you need it to start later, change that 0 (and also update the introDelay)
@@ -135,7 +138,7 @@ async function getData(scInfo) {
 
 			document.getElementById('roundIntro').textContent = round;
 			document.getElementById('tNameIntro').textContent = tournamentName;
-			
+
 			//round, tournament and VS/GameX text fade in
 			gsap.to(".textIntro", {delay: introDelay-.2, opacity: 1, ease: "power2.out", duration: fadeInTime});
 
@@ -150,7 +153,7 @@ async function getData(scInfo) {
 		//update player name and team name texts
 		updatePlayerName('p1Wrapper', 'p1Name', 'p1Team', p1Name, p1Team);
 		//sets the starting position for the player text, then fades in and moves the p1 text to the next keyframe
-		gsap.fromTo("#p1Wrapper", 
+		gsap.fromTo("#p1Wrapper",
 			{x: -pMove}, //from
 			{delay: introDelay+.1, x: 0, opacity: 1, ease: "power2.out", duration: fadeInTime}); //to
 
@@ -181,7 +184,7 @@ async function getData(scInfo) {
 
 		//took notes from player 1? well, this is exactly the same!
 		updatePlayerName('p2Wrapper', 'p2Name', 'p2Team', p2Name, p2Team);
-		gsap.fromTo("#p2Wrapper", 
+		gsap.fromTo("#p2Wrapper",
 			{x: pMove},
 			{delay: introDelay+.1, x: 0, opacity: 1, ease: "power2.out", duration: fadeInTime});
 
@@ -200,18 +203,22 @@ async function getData(scInfo) {
 		updateColor('p2Color', 'p2Name', p2Color);
 		p2ColorPrev = p2Color;
 
+		//set the tournament text
+		updateText("tournament", tournamentName, tournamentSize);
 
 		//set this for later
 		bestOfPrev = bestOf;
+
+
 
 
 		//update the round text
 		updateRound(round);
 		//update the best of text
 		if (bestOf == "Bo5") {
-			document.getElementById('bestOf').textContent = "Best of 5";
+			document.getElementById('bestOf').textContent = "";
 		} else {
-			document.getElementById('bestOf').textContent = "Best of 3";
+			document.getElementById('bestOf').textContent = "";
 		}
 		//fade them in (but only if round text is not empty)
 		if (round != "") {
@@ -268,7 +275,7 @@ async function getData(scInfo) {
 
 	//now things that will happen constantly
 	else {
-		
+
 		//player 1 time!
 		if (document.getElementById('p1Name').textContent != p1Name ||
 			document.getElementById('p1Team').textContent != p1Team) {
@@ -393,9 +400,9 @@ async function getData(scInfo) {
 				gsap.fromTo('#win3P2',
 					{x: pMove},
 					{x: 0, opacity: 1, ease: "power2.out", duration: fadeInTime});
-				
+
 				fadeOut("#bestOf", () => {
-					document.getElementById('bestOf').textContent = "Best of 5";
+					document.getElementById('bestOf').textContent = "";
 					fadeIn("#bestOf");
 				});
 			} else {
@@ -405,14 +412,14 @@ async function getData(scInfo) {
 					{x: pMove, opacity: 0, ease: "power2.in", duration: fadeInTime});
 
 				fadeOut("#bestOf", () => {
-					document.getElementById('bestOf').textContent = "Best of 3";
+					document.getElementById('bestOf').textContent = "";
 					fadeIn("#bestOf");
 				});
 			}
 			bestOfPrev = bestOf;
 		}
 
-		
+
 		//update the round text
 		if (document.getElementById('round').textContent != round){
 			fadeOut("#overlayRound", () => {
@@ -420,6 +427,14 @@ async function getData(scInfo) {
 				if (round != "") {
 					fadeIn("#overlayRound");
 				}
+			});
+		}
+
+		//update the tournament text
+		if (document.getElementById('tournament').textContent != tournamentName){
+			fadeOut("#tournament", () => {
+				updateText("tournament", tournamentName, tournamentSize);
+				fadeIn("#tournament", .2);
 			});
 		}
 
@@ -540,7 +555,7 @@ function socialChange1(twitterWrapperID, twitchWrapperID) {
 			twitterWrapperEL.style.opacity = 1;
 			twitchWrapperEL.style.opacity = 0;
 		}
-		
+
 
 	} else if (!!twitter1 && !!twitch1) {
 
@@ -702,19 +717,19 @@ function moveScoresIntro(pNum, bestOf, pWL, move) {
 	const score3EL = document.getElementById('win3P'+pNum);
 	const wlEL = document.getElementById('wlP'+pNum);
 
-	gsap.fromTo(score1EL, 
+	gsap.fromTo(score1EL,
 		{x:-move},
 		{delay: introDelay+.2, x: 0, opacity: 1, ease: "power2.out", duration: fadeInTime});
-	gsap.fromTo(score2EL, 
+	gsap.fromTo(score2EL,
 		{x:-move},
 		{delay: introDelay+.4, x: 0, opacity: 1, ease: "power2.out", duration: fadeInTime});
 	if (bestOf == "Bo5") {
-		gsap.fromTo(score3EL, 
+		gsap.fromTo(score3EL,
 			{x:-move},
 			{delay: introDelay+.6, x: 0, opacity: 1, ease: "power2.out", duration: fadeInTime});
 	}
 	if (pWL == "W" || pWL == "L") {
-		gsap.fromTo(wlEL, 
+		gsap.fromTo(wlEL,
 			{x:-move},
 			{delay: introDelay+.8, x: 0, opacity: 1, ease: "power2.out", duration: fadeInTime});
 	}
@@ -757,9 +772,9 @@ function getFontSize(textElement) {
 function getHexColor(color) {
 	switch (color) {
 		case "Player 1":
-			return "#ff0000";
+			return "#ff5d5d";
 		case "Player 2":
-			return "#0069ec";
+			return "#5bc7f8";
 	}
 }
 
@@ -809,5 +824,5 @@ async function updateChar(pCharacter, pSkin, charID, sagaID) {
 		}
 	})}
 
-	
+
 }
